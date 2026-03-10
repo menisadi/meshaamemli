@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#3B82F6">
+    <title>מה עושים היום?</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Rubik', sans-serif; background-color: #f0f9ff; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+        .btn-kid { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); background-size: 200% auto; }
+        .btn-kid:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
+        .btn-kid:active { transform: translateY(2px) scale(0.95); }
+        
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            70% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        
+        @keyframes spinText {
+            0% { transform: translateY(-10px); opacity: 0.5; }
+            50% { transform: translateY(0px); opacity: 1; }
+            100% { transform: translateY(10px); opacity: 0.5; }
+        }
+        .spinning-text { animation: spinText 0.1s infinite; color: #cbd5e1; }
+    </style>
+</head>
+<body class="min-h-screen p-3 flex flex-col items-center justify-start md:justify-center" ontouchstart="">
+
+    <div class="mb-4 mt-2 flex gap-2 bg-white p-2 rounded-full shadow-md z-10 w-full max-w-sm justify-center">
+        <button onclick="switchView('kid')" class="px-5 py-2 rounded-full font-bold text-blue-600 bg-blue-100 hover:bg-blue-200 transition-colors w-1/2 text-sm">👦 ילדים</button>
+        <button onclick="switchView('parent')" class="px-5 py-2 rounded-full font-bold text-gray-500 hover:bg-gray-100 transition-colors w-1/2 text-sm">⚙️ הורים</button>
+    </div>
+
+    <div id="kid-view" class="w-full max-w-4xl text-center flex flex-col h-full justify-center">
+        <h1 class="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-500 mb-6 drop-shadow-sm">מה בא לך לעשות?</h1>
+        
+        <div id="mood-buttons" class="grid grid-cols-2 md:grid-cols-3 gap-3 px-2 w-full max-w-md md:max-w-none mx-auto">
+            
+            <button onclick="startWheel('calm')" class="btn-kid bg-gradient-to-br from-teal-300 to-teal-500 text-white font-black py-4 px-2 rounded-2xl shadow-lg border-b-[6px] border-teal-600 flex flex-col items-center justify-center gap-2">
+                <span class="text-4xl drop-shadow-md">🎨</span>
+                <span class="text-sm md:text-xl">משהו רגוע</span>
+            </button>
+            
+            <button onclick="startWheel('social')" class="btn-kid bg-gradient-to-br from-pink-300 to-pink-500 text-white font-black py-4 px-2 rounded-2xl shadow-lg border-b-[6px] border-pink-600 flex flex-col items-center justify-center gap-2">
+                <span class="text-4xl drop-shadow-md">🎲</span>
+                <span class="text-sm md:text-xl">עם חברים</span>
+            </button>
+
+            <button onclick="startWheel('alone')" class="btn-kid bg-gradient-to-br from-indigo-300 to-indigo-500 text-white font-black py-4 px-2 rounded-2xl shadow-lg border-b-[6px] border-indigo-600 flex flex-col items-center justify-center gap-2">
+                <span class="text-4xl drop-shadow-md">🧩</span>
+                <span class="text-sm md:text-xl">משהו לבד</span>
+            </button>
+
+            <button onclick="startWheel('energy')" class="btn-kid bg-gradient-to-br from-red-300 to-red-500 text-white font-black py-4 px-2 rounded-2xl shadow-lg border-b-[6px] border-red-600 flex flex-col items-center justify-center gap-2">
+                <span class="text-4xl drop-shadow-md">⚡</span>
+                <span class="text-sm md:text-xl">להוציא אנרגיה</span>
+            </button>
+
+            <button onclick="startWheel('forgotten')" class="btn-kid col-span-2 md:col-span-1 bg-gradient-to-br from-orange-300 to-orange-500 text-white font-black py-4 px-4 rounded-2xl shadow-lg border-b-[6px] border-orange-600 flex flex-row md:flex-col items-center justify-center gap-3">
+                <span class="text-4xl drop-shadow-md">🚀</span>
+                <span class="text-base md:text-xl">מזמן לא עשיתי</span>
+            </button>
+        </div>
+
+        <div id="wheel-area" class="mt-6 hidden px-4 w-full">
+            <div class="bg-white p-8 rounded-3xl shadow-2xl border-4 md:border-8 border-yellow-300 relative overflow-hidden max-w-xl mx-auto w-full">
+                <div class="absolute top-0 left-0 w-full h-3 bg-yellow-300"></div>
+                <h2 class="text-lg font-bold text-gray-400 mb-2" id="wheel-title">מערבב את הפעילויות...</h2>
+                <div id="recommended-game" class="text-3xl md:text-5xl font-black text-blue-600 min-h-[60px] flex items-center justify-center text-center"></div>
+            </div>
+            
+            <div id="action-buttons" class="mt-8 hidden flex flex-col gap-4 items-center">
+                <button onclick="resetMoods()" class="bg-green-500 hover:bg-green-600 text-white font-bold text-lg py-3 px-8 rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95">🎉 תודה! אני אלך לעשות את זה</button>
+                <button onclick="startWheel(currentMood)" class="text-gray-500 font-bold text-base underline hover:text-gray-700">לא בא לי את זה, סובב שוב 🔄</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="parent-view" class="w-full max-w-2xl hidden bg-white p-5 md:p-8 rounded-[2rem] shadow-xl border-2 border-blue-50">
+        <h2 class="text-2xl font-black text-gray-800 mb-4">ניהול מאגר פעילויות 🛠️</h2>
+        
+        <div class="flex flex-col gap-3 mb-6 bg-blue-50 p-4 rounded-2xl border border-blue-100">
+            <h3 class="font-bold text-blue-800 mb-1 text-sm">הוספת פעילות חדשה:</h3>
+            
+            <input type="text" id="game-name" placeholder="שם הפעילות (למשל: לגו או ציור)" class="w-full border-2 border-blue-200 p-3 rounded-xl focus:outline-none focus:border-blue-500 font-semibold">
+            
+            <select id="game-category" class="w-full border-2 border-blue-200 p-3 rounded-xl focus:outline-none focus:border-blue-500 font-semibold bg-white text-gray-700"></select>
+            
+            <div class="mt-2 mb-1">
+                <h4 class="font-bold text-xs text-blue-700 mb-2">לאיזה מצב רוח הפעילות מתאימה? (אפשר לסמן כמה)</h4>
+                <div class="grid grid-cols-2 gap-2 text-sm bg-white p-3 rounded-xl border border-blue-100">
+                    <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="mood-tags" value="calm" class="w-4 h-4"> רגוע</label>
+                    <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="mood-tags" value="social" class="w-4 h-4"> עם חברים</label>
+                    <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="mood-tags" value="alone" class="w-4 h-4"> לבד</label>
+                    <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="mood-tags" value="energy" class="w-4 h-4"> להוציא אנרגיה</label>
+                </div>
+            </div>
+
+            <button onclick="addGame()" class="mt-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-md transition-all active:scale-95 text-lg">➕ הוסף למאגר</button>
+        </div>
+
+        <div class="flex justify-between items-center mb-3">
+            <h3 class="font-bold text-gray-500">הפעילויות שלכם:</h3>
+            <span id="game-count" class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-xs font-bold"></span>
+        </div>
+        
+        <ul id="games-list" class="space-y-3 max-h-[40vh] overflow-y-auto pr-1 pb-4"></ul>
+    </div>
+
+    <script>
+        let categories = ['יצירה', 'דמיון', 'בניה', 'אסטרטגיה', 'משחקי קופסה', 'חוברות פעילות', 'תנועה וספורט'];
+        let games = [];
+        let currentMood = '';
+        
+        let audioCtx;
+
+        const moodNames = { calm: 'רגוע', social: 'חברים', alone: 'לבד', energy: 'אנרגיה' };
+
+        init();
+
+        function init() {
+            loadData();
+            if(games.length === 0) {
+                games = [
+                    { id: 1, name: 'לגו', category: 'בניה', isFavorite: true, moods: ['alone', 'calm'] },
+                    { id: 2, name: 'צבעי מים', category: 'יצירה', isFavorite: false, moods: ['alone', 'calm'] },
+                    { id: 3, name: 'טאקי', category: 'משחקי קופסה', isFavorite: true, moods: ['social'] },
+                    { id: 4, name: 'מחבואים', category: 'תנועה וספורט', isFavorite: false, moods: ['social', 'energy'] }
+                ];
+                saveData();
+            }
+            renderCategories();
+            renderGamesList();
+        }
+
+        function saveData() {
+            localStorage.setItem('kidsApp_games', JSON.stringify(games));
+            localStorage.setItem('kidsApp_categories', JSON.stringify(categories));
+            updateGameCount();
+        }
+
+        function loadData() {
+            try {
+                const savedGames = localStorage.getItem('kidsApp_games');
+                const savedCats = localStorage.getItem('kidsApp_categories');
+                if (savedGames) {
+                    let parsedGames = JSON.parse(savedGames);
+                    // תיקון אוטומטי לנתונים ישנים שאין להם את השדה moods
+                    games = parsedGames.map(g => {
+                        if (!g.moods) g.moods = [];
+                        return g;
+                    });
+                }
+                if (savedCats) categories = JSON.parse(savedCats);
+            } catch (e) {
+                console.error('Error loading data', e);
+                games = [];
+            }
+            updateGameCount();
+        }
+
+        function updateGameCount() {
+            const countEl = document.getElementById('game-count');
+            if(countEl) countEl.innerText = `${games.length} פעילויות`;
+        }
+
+        function switchView(view) {
+            document.getElementById('kid-view').classList.toggle('hidden', view !== 'kid');
+            document.getElementById('parent-view').classList.toggle('hidden', view !== 'parent');
+            if(view === 'kid') resetMoods();
+        }
+
+        function unlockAudio() {
+            try {
+                if (!audioCtx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if(AudioContext) audioCtx = new AudioContext();
+                }
+                if (audioCtx && audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                if(audioCtx) {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    gain.gain.value = 0; 
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(0);
+                    osc.stop(audioCtx.currentTime + 0.1);
+                }
+            } catch(e) {
+                console.log('Audio disabled or blocked');
+            }
+        }
+
+        function playWinSound() {
+            try {
+                if (!audioCtx) return;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.1);
+                osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.2);
+                gain.gain.setValueAtTime(0, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.5);
+            } catch(e) {
+                console.log('Error playing sound');
+            }
+        }
+
+        function renderCategories() {
+            const select = document.getElementById('game-category');
+            select.innerHTML = categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+            select.innerHTML += `<option value="new" class="font-bold text-blue-600">+ הוסף קטגוריה חדשה...</option>`;
+        }
+
+        function renderGamesList() {
+            const list = document.getElementById('games-list');
+            if (games.length === 0) {
+                list.innerHTML = '<div class="text-center p-6 text-gray-400 font-bold bg-gray-50 rounded-2xl">אין פה פעילויות עדיין 🤷‍♂️</div>';
+                return;
+            }
+            
+            const sortedGames = [...games].sort((a, b) => (b.isFavorite === a.isFavorite) ? 0 : b.isFavorite ? 1 : -1);
+
+            list.innerHTML = sortedGames.map(game => {
+                const badges = (game.moods || []).map(m => 
+                    `<span class="text-[10px] bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded shadow-sm border border-indigo-100">${moodNames[m] || m}</span>`
+                ).join(' ');
+
+                return `<li class="bg-white border-2 border-gray-100 p-3 md:p-4 rounded-2xl flex justify-between items-center shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex flex-col gap-1 w-full">
+                        <span class="font-bold text-base md:text-lg text-gray-800">${game.name}</span>
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <span class="text-[11px] font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full">${game.category}</span>
+                            ${badges}
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button onclick="toggleFavorite(${game.id})" class="text-xl md:text-2xl transition-transform hover:scale-125 focus:outline-none">
+                            ${game.isFavorite ? '❤️' : '🤍'}
+                        </button>
+                        <button onclick="deleteGame(${game.id})" class="text-red-400 hover:text-red-600 text-sm bg-red-50 px-2 py-1 rounded-lg">מחק</button>
+                    </div>
+                </li>`;
+            }).join('');
+        }
+
+        function addGame() {
+            const nameInput = document.getElementById('game-name');
+            const categorySelect = document.getElementById('game-category');
+            const moodCheckboxes = document.querySelectorAll('input[name="mood-tags"]:checked');
+            
+            let name = nameInput.value.trim();
+            let category = categorySelect.value;
+            let selectedMoods = Array.from(moodCheckboxes).map(cb => cb.value);
+
+            if (!name) return alert('איך קוראים לפעילות?');
+
+            if (category === 'new') {
+                const newCat = prompt('איך קוראים לקטגוריה החדשה?');
+                if (newCat && newCat.trim() !== '') {
+                    categories.push(newCat.trim());
+                    category = newCat.trim();
+                    renderCategories();
+                } else {
+                    categorySelect.value = categories[0];
+                    return;
+                }
+            }
+
+            games.unshift({ 
+                id: Date.now(), 
+                name: name, 
+                category: category, 
+                isFavorite: false,
+                moods: selectedMoods 
+            });
+            
+            saveData();
+            
+            nameInput.value = '';
+            document.querySelectorAll('input[name="mood-tags"]').forEach(cb => cb.checked = false);
+            
+            renderGamesList();
+        }
+
+        function toggleFavorite(id) {
+            const game = games.find(g => g.id === id);
+            if(game) {
+                game.isFavorite = !game.isFavorite;
+                saveData();
+                renderGamesList();
+            }
+        }
+
+        function deleteGame(id) {
+            if(confirm('למחוק את הפעילות הזו מהמאגר?')) {
+                games = games.filter(g => g.id !== id);
+                saveData();
+                renderGamesList();
+            }
+        }
+
+        function getMatchingGames(mood) {
+            let matches = [];
+            
+            if (mood === 'forgotten') {
+                matches = games;
+            } else {
+                matches = games.filter(g => g.moods && g.moods.includes(mood));
+            }
+            
+            // מנגנון הגנה קריטי: אם לא נמצאה פעילות מתאימה (או שהמאגר ריק), ניקח את הכל
+            if (matches.length === 0) {
+                matches = games;
+            }
+            
+            return matches;
+        }
+
+        function startWheel(mood) {
+            if (games.length === 0) {
+                alert('היי! צריך לבקש מההורים להוסיף פעילויות למאגר קודם.');
+                switchView('parent');
+                return;
+            }
+
+            unlockAudio();
+
+            currentMood = mood;
+            const matchingGames = getMatchingGames(mood);
+            
+            // מנגנון הגנה למקרה חריג בו matchingGames ריק לגמרי
+            if(!matchingGames || matchingGames.length === 0) {
+                alert('קרתה שגיאה בטעינת הפעילויות. מנסה לאפס...');
+                return;
+            }
+
+            const winner = matchingGames[Math.floor(Math.random() * matchingGames.length)];
+
+            document.getElementById('mood-buttons').classList.add('hidden');
+            document.getElementById('wheel-area').classList.remove('hidden');
+            document.getElementById('action-buttons').classList.add('hidden');
+            
+            const recGame = document.getElementById('recommended-game');
+            const title = document.getElementById('wheel-title');
+            
+            recGame.classList.remove('animate-pop', 'text-blue-600');
+            recGame.classList.add('spinning-text');
+            title.innerText = 'מערבב את הפעילויות... 🎲';
+
+            let spins = 0;
+            const maxSpins = 20; 
+            
+            const spinInterval = setInterval(() => {
+                recGame.innerText = matchingGames[Math.floor(Math.random() * matchingGames.length)].name;
+                spins++;
+                
+                if (spins >= maxSpins) {
+                    clearInterval(spinInterval);
+                    finishSpin(winner);
+                }
+            }, 80);
+        }
+
+        function finishSpin(winnerGame) {
+            const recGame = document.getElementById('recommended-game');
+            const title = document.getElementById('wheel-title');
+            
+            recGame.classList.remove('spinning-text');
+            recGame.classList.add('animate-pop', 'text-blue-600');
+            
+            const favoriteIcon = winnerGame.isFavorite ? ' ❤️' : ' 🎉';
+            recGame.innerText = winnerGame.name + favoriteIcon;
+            
+            let prefix = "ההמלצה שלי בשבילך היא:";
+            if(currentMood === 'energy') prefix = "הגיע הזמן לקפוץ! לך על:";
+            if(currentMood === 'alone') prefix = "זמן איכות עם עצמך:";
+            
+            title.innerText = prefix;
+            document.getElementById('action-buttons').classList.remove('hidden');
+            
+            playWinSound();
+        }
+
+        function resetMoods() {
+            document.getElementById('mood-buttons').classList.remove('hidden');
+            document.getElementById('wheel-area').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
